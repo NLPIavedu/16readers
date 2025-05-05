@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <title>閱讀人格測驗</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      font-family: "Segoe UI", "微軟正黑體", sans-serif;
+      background: #f5f5f5;
+      margin: 0;
+      padding: 0;
+      color: #333;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .container {
+      max-width: 600px;
+      margin-top: 60px;
+      padding: 30px;
+      background: white;
+      border-radius: 10px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+      animation: fadeIn 0.6s ease-out;
+    }
+
+    button {
+      background-color: #4CAF50;
+      color: white;
+      padding: 12px 24px;
+      border: none;
+      border-radius: 6px;
+      font-size: 16px;
+      cursor: pointer;
+      margin-top: 20px;
+      transition: background-color 0.3s ease;
+    }
+
+    button:hover {
+      background-color: #45a049;
+    }
+
+    .choices button {
+      display: inline-block;
+      width: 45%;
+      margin: 10px 2.5%;
+    }
+
+    #question {
+      font-size: 20px;
+      font-weight: bold;
+      margin-bottom: 30px;
+      line-height: 1.5;
+    }
+
+    #results img {
+      width: 100%;
+      border-radius: 12px;
+      margin: 20px 0;
+    }
+
+    #results h2 {
+      text-align: center;
+      font-size: 24px;
+      color: #2c3e50;
+    }
+
+    #results p, #results blockquote {
+      margin: 10px 0;
+      line-height: 1.6;
+    }
+
+    a {
+      color: #1976d2;
+      text-decoration: none;
+      margin-top: 10px;
+      display: inline-block;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    /* 粒子背景容器 */
+    #particles-js {
+      position: fixed;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+      background: linear-gradient(180deg, #B3C7E6 0%, #C4C3D0 100%);
+    }
+
+    /* 漂浮 emoji 圖示樣式 */
+    .floating-emoji {
+      position: fixed;
+      font-size: 32px;
+      animation: floatUp 12s linear infinite;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    @keyframes floatUp {
+      0% {
+        transform: translateY(100vh) scale(1);
+        opacity: 0;
+      }
+      50% {
+        opacity: 1;
+      }
+      100% {
+        transform: translateY(-10vh) scale(1.2);
+        opacity: 0;
+      }
+    }
+
+    /* 題目與結果動畫 */
+    .fade-in-up {
+      animation: fadeInUp 0.6s ease forwards;
+    }
+
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* 按鈕點擊動畫 */
+    button:active {
+      transform: scale(0.95);
+    }
+
+  </style>
+</head>
+<body>
+
+<div id="particles-js"></div>
+<div class="container" id="home">
+  <h1>📘 閱讀人格測驗</h1>
+  <p>透過 12 題快速了解你的閱讀風格與學習偏好 🍉📖</p>
+  <button id="begin-quiz">開始測驗</button>
+</div>
+
+<div class="container" id="quiz-page" style="display:none;">
+  <div id="question"></div>
+  <div class="choices" id="choices"></div>
+</div>
+
+<div class="container" id="results" style="display:none;"></div>
+
+<script>
+  const questions = [
+    {
+      question: "翻紙書的聲音+觸感，就是我放鬆的 ASMR。",
+      weights: { yes: { S: 1 }, no: { N: 1 } }
+    },
+    {
+      question: "書能隨身帶又不占空間＝電子書大勝！通勤神器。",
+      weights: { yes: { N: 1 }, no: { S: 1 } }
+    },
+    {
+      question: "書櫃要斷捨離？沒問題，我的電子書櫃容量無上限。",
+      weights: { yes: { N: 1 }, no: { S: 1 } }
+    },
+    {
+      question: "一本書從頭看到尾才有「征服」感，章節跳著看我會不安。",
+      weights: { yes: { T: 1 }, no: { F: 1 } }
+    },
+    {
+      question: "看書就像點飲料，今天想看哪一章就點哪一章！",
+      weights: { yes: { F: 1 }, no: { T: 1 } }
+    },
+    {
+      question: "有些書我只挑跟我人生當下有關的章節，閱讀要貼近情緒才行。",
+      weights: { yes: { F: 1 }, no: { T: 1 } }
+    },
+    {
+      question: "喜歡的書我一定會借回家或下載，怕下次找不到會焦慮。",
+      weights: { yes: { J: 1 }, no: { P: 1 } }
+    },
+    {
+      question: "我愛在圖書館/平台亂逛，像在逛誠品或二手市集一樣。",
+      weights: { yes: { P: 1 }, no: { J: 1 } }
+    },
+    {
+      question: "我有一堆下載沒看完的電子書，但我覺得「擁有」本身就很爽。",
+      weights: { yes: { J: 1 }, no: { P: 1 } }
+    },
+    {
+      question: "影片太慢，我寧願看重點摘要或文字教學。",
+      weights: { yes: { W: 1 }, no: { M: 1 } }
+    },
+    {
+      question: "我是 YouTube 大學畢業生，知識還是影片吸收最快。",
+      weights: { yes: { M: 1 }, no: { W: 1 } }
+    },
+    {
+      question: "學東西我偏愛看圖文，有畫面又有邏輯最讚。",
+      weights: { yes: { W: 1 }, no: { M: 1 } }
+    }
+  ];
+
+  let currentQuestionIndex = 0;
+  let scores = { S: 0, N: 0, T: 0, F: 0, J: 0, P: 0, W: 0, M: 0 };
+
+  document.getElementById('begin-quiz').addEventListener('click', () => {
+    document.getElementById('home').style.display = 'none';
+    document.getElementById('quiz-page').style.display = 'block';
+    displayCurrentQuestion();
+  });
+
+  function displayCurrentQuestion() {
+    const questionObj = questions[currentQuestionIndex];
+    document.getElementById('question').textContent = questionObj.question;
+
+    const choicesContainer = document.getElementById('choices');
+    choicesContainer.innerHTML = '';
+
+    ['yes', 'no'].forEach(choice => {
+      const btn = document.createElement('button');
+      btn.textContent = choice === 'yes' ? '是' : '否';
+      btn.addEventListener('click', () => handleChoice(choice));
+      choicesContainer.appendChild(btn);
+    });
+    document.getElementById('quiz-page').classList.add('fade-in-up');
+  }
+
+  function handleChoice(choiceKey) {
+    const weight = questions[currentQuestionIndex].weights[choiceKey];
+    for (const key in weight) {
+      scores[key] += weight[key];
+    }
+
+    currentQuestionIndex++;
+    if (currentQuestionIndex < questions.length) {
+      displayCurrentQuestion();
+    } else {
+      displayResult();
+    }
+  }
+
+  // 🎯 加入剛才生成的完整 displayResult() 函式
+  // 👇 在這裡直接貼上你剛剛我給的 `displayResult()` 完整版即可
+  function displayResult() {
+  const resultCode =
+    (scores.S >= scores.N ? 'S' : 'N') +
+    (scores.T >= scores.F ? 'T' : 'F') +
+    (scores.J >= scores.P ? 'J' : 'P') +
+    (scores.W >= scores.M ? 'W' : 'M');
+
+  const resultProfiles = {
+    STJW: {
+      title: "📖 書房規劃師",
+      role: "📚 你是：紙本重度愛好者・全字閱讀者・計畫控・文字派",
+      desc: "🔍 書要一本本來、章節要順讀、資料存好存滿、邊看邊筆記，家裡像圖書館。",
+      tags: "🧠 特色標籤：#逐頁閱讀 #手寫筆記 #讀完才安心",
+      quote: "🗯️ 「我有一份書櫃 Excel，每本都有代號。」",
+      prescription: `
+      💊 線上閱讀處方簽：你需要一個乾淨有邏輯的書櫃──數位的那種。
+      ✅ PDF格式還原原書排版，適合你建立有條不紊的筆記與章節索引
+      ✅ 自建專屬線上書庫＋自動記錄進度，讓你像管理Excel一樣管理閱讀
+      💡 最理想的閱讀，是讓知識在電子與紙本間流動。`
+    },
+    STJM: {
+      title: "📖 PDF 導演",
+      role: "📚 你是：紙本使用者・全字閱讀者・計畫控・影像輔助型",
+      desc: "🔍 邏輯閱讀者，但喜歡搭配影像輔助，彷彿知識影片編導般調配學習節奏。",
+      tags: "🧠 特色標籤：#一頁一重播 #紙本為主 #影像為輔",
+      quote: "🗯️ 「我邊畫重點邊開雙螢幕播放講座。」",
+      prescription: `
+      💊 線上閱讀處方簽：你是知識的導播，電子書就是你的素材庫。
+      ✅ PDF為主、搭配影音資源的閱讀方式，完美符合你的學習節奏
+      ✅ 電子書支援全文檢索，快速找到重點片段再搭配影片學習
+      🎬 收藏的，不只是書，而是你與知識相遇的節奏剪輯。`
+    },
+    STPW: {
+      title: "📖 圖書館遊俠",
+      role: "📚 你是：紙本玩家・結構偏好者・隨興派・文字主導",
+      desc: "🔍 翻紙書像逛市集，跳讀資訊、筆記不離手，自由但有條理，是行動中的學者。",
+      tags: "🧠 特色標籤：#跳讀派 #圖書館漫遊 #行走的便條紙",
+      quote: "🗯️ 「書我沒借，但我做了一份閱讀路線圖。」",
+      prescription: `
+      💊 線上閱讀處方簽：自由但有脈絡，你需要一本可以隨翻隨記的書。
+      ✅ EPUB支援跳讀、調整字體，讓你隨性也能高效
+      ✅ 手機、平板同步閱讀，走到哪讀到哪
+      📍 用註記描下你的閱讀軌跡，每一頁都是你走過的知識地圖。`
+    },
+    STPM: {
+      title: "📖 隨性轉檔王",
+      role: "📚 你是：紙本感・邏輯腦・隨機選書者・影像支持者",
+      desc: "🔍 書掃一半轉 YouTube 查重點，不規則學習路線但效率超高。",
+      tags: "🧠 特色標籤：#多工學習 #書影片自由切換 #邏輯小叛逆",
+      quote: "🗯️ 「學習是打怪，看哪邊掉裝我就去哪裡。」",
+      prescription: `
+      💊 線上閱讀處方簽：學習就像打怪，要靈活切換武器。
+      ✅ 電子書＋YouTube雙線進攻，平台支援多裝置閱讀，邊查邊讀超順手
+      ✅ 書內快速搜尋功能幫你找到知識熱點
+      🎮 Podcast在耳，知識在身，你，獨自升級。`
+    },
+    SFJW: {
+      title: "📖 感性典藏家",
+      role: "📚 你是：紙本深情派・共鳴式閱讀者・資料囤積者・文字偏好者",
+      desc: "🔍 書中有情、頁中有光，情緒觸發式閱讀，喜歡收藏心情與書本的連結。",
+      tags: "🧠 特色標籤：#書封記憶 #章節共感 #筆記當日記",
+      quote: "🗯️ 「我寫筆記不是學習，是整理我的情緒。」",
+      prescription: `
+      💊 線上閱讀處方簽：你收藏的不只是書，是回憶。
+      ✅ 電子書註記功能可以寫心情不怕弄髒書
+      ✅ 自動記錄閱讀進度，讓每次打開都像續寫日記
+      📚 收藏的不只是書，而是你情緒的棲身之所。`
+    },
+    SFJM: {
+      title: "📖 氛圍學習家",
+      role: "📚 你是：紙本療癒派・感受導向者・計畫型收藏者・影像補強者",
+      desc: "🔍 書與影片交錯進行、氣氛派閱讀方式，學習像在泡一壺溫書茶。",
+      tags: "🧠 特色標籤：#氛圍優先 #讀書儀式感 #療癒式成長",
+      quote: "🗯️ 「我讀書時點香氛，搭配 TedTalk。」",
+      prescription: `
+      💊 線上閱讀處方簽：你需要的不只是書，還有儀式感。
+      ✅ 電子書平台全年無休，任何時刻都能泡一壺書香茶
+      ✅ 分類搜尋幫你找到適合當下情緒的閱讀選項
+      🕯 讓香氛與知識同時流動，你的閱讀，就是一場溫柔的SPA。`
+    },
+    SFPW: {
+      title: "📖 文青漫遊者",
+      role: "📚 你是：紙本玩家・感性選書者・探索式學習者・文字主義",
+      desc: "🔍 翻書像散步、挑書看封面、哪頁漂亮哪頁看，學習風格如同貓咪探索房間。",
+      tags: "🧠 特色標籤：#看封面決定書命運 #靈感式學習 #慢翻也很忙",
+      quote: "🗯️ 「哪一頁好看我才打開，書要先會自拍。」",
+      prescription: `
+      💊 線上閱讀處方簽：閱讀是慢活，也是自我探索。
+      ✅ EPUB格式可以自調字體與排版，哪頁好看哪頁停
+      ✅ 圖文書、繪本、漫畫多元藏書，讓你從封面開始愛上閱讀
+      📸 封面吸引你的那一秒，就是你與書的命定瞬間，收藏它吧。`
+    },
+    SFPM: {
+      title: "📖 圖像直覺者",
+      role: "📚 你是：紙本愛好・感受流派・自由翻書型・影像派",
+      desc: "🔍 有畫面就有動力、影片+書本混搭、吸收方式取決於情境與心情。",
+      tags: "🧠 特色標籤：#圖像記憶 #有感才學 #氛圍吸收型",
+      quote: "🗯️ 「書裡有圖片我就會看完，沒圖？我去看影片。」",
+      prescription: `
+      💊 線上閱讀處方簽：你是用畫面記憶世界的感官型讀者。
+      ✅ 圖文書與繪本是你的主場，電子書支援高清圖像無負擔
+      ✅ 搭配有聲書與影片資源，切換閱讀模式更有感
+      🎨 指尖劃過畫面，是你與知識共鳴的一瞬光影。`
+    },
+    NTJW: {
+      title: "📖 數據策展師",
+      role: "📚 你是：電子資料型・邏輯規則者・有備無患型・文字派",
+      desc: "🔍 電子書分類清楚、閱讀紀錄有報表，文字才是可靠知識來源，系統魂滿滿。",
+      tags: "🧠 特色標籤：#雲端歸檔 #下載成就感 #知識庫控",
+      quote: "🗯️ 「我有資料夾的資料夾，還有備份的備份。」",
+      prescription: `
+      💊 線上閱讀處方簽：系統與分類，是你閱讀的前提。
+      ✅ 電子書平台支援自建書庫，是你的知識管理天堂
+      ✅ 文字為主、EPUB格式支援全書搜尋，建立資料夾的資料夾的資料夾沒問題
+      📈 知識在累積，進度在更新，每一頁都邁向自我升級。`
+    },
+    NTJM: {
+      title: "📖 知識剪輯手",
+      role: "📚 你是：邏輯學習控・電子派・結構嚴謹型・影像支持派",
+      desc: "🔍 喜歡邏輯學習但用影像補強，做自己的微學習課程剪輯師。",
+      tags: "🧠 特色標籤：#片段筆記王 #線上學習 #自製課程型讀者",
+      quote: "🗯️ 「我看影片會剪精華備註，學完自己再複製一次講給貓聽。」",
+      prescription: `
+      💊 線上閱讀處方簽：你是自己的學習導師，資源就是素材。
+      ✅ PDF或影片內容快速抓重點，筆記轉成教案是你的日常
+      ✅ 電子書＋有聲書＋筆記＝完整的線上課程體驗
+      ✂ 閱讀像剪輯，分類是軌道，知識累積在精準編排的每一幀。`
+    },
+    NTPW: {
+      title: "📖 雲端飄讀者",
+      role: "📚 你是：電子飄逸者・跳讀控・隨性知識收集者・文字偏好",
+      desc: "🔍 電子書飄來飄去、哪裡打開哪裡看，不設限學習、雲端儲存萬歲。",
+      tags: "🧠 特色標籤：#打開即學 #沒有書架也能有書海 #資訊自由派",
+      quote: "🗯️ 「我今天讀到哪，就從哪下載開始。」",
+      prescription: `
+      💊 線上閱讀處方簽：今天在哪開書，就從哪開始讀。
+      ✅ 支援多裝置閱讀，不需書架也能擁有書海
+      ✅ 開放式閱讀風格＋自由註記讓你學習不設限
+      🌤 在手機裡收藏全世界，在搜尋裡發現更好的自我。`
+    },
+    NTPM: {
+      title: "📖 影像即正義",
+      role: "📚 你是：電子專精派・結構跳讀者・自由主義學習者・影像快吸型",
+      desc: "🔍 一切能影片解決就不打字，從 YouTube 學到四書五經也不為過。",
+      tags: "🧠 特色標籤：#YT碩士 #速食知識型 #看完會解說",
+      quote: "🗯️ 「我不讀，我聽懂了。」",
+      prescription: `
+      💊 線上閱讀處方簽：知識＝看懂，文字只是選項。
+      ✅ 電子書平台整合MP3和有聲書，讓你用眼耳同步吸收
+      ✅ 書內主題搜尋功能讓你跳讀更高效
+      🎧 通勤中不只是位移，也是知識悄悄貼近的時候。`
+    },
+    NFJW: {
+      title: "📖 真誠筆記控",
+      role: "📚 你是：電子情感派・共鳴式記錄者・收藏為主型・文字偏好者",
+      desc: "🔍 追求自我成長路上必有 Highlight、文字是療癒也是反思的途徑。",
+      tags: "🧠 特色標籤：#筆記溫柔派 #自我對話型 #Highlight如詩",
+      quote: "🗯️ 「我不是記筆記，是記當下的我。」",
+      prescription: `
+      💊 線上閱讀處方簽：筆記是你跟自己的對話，不只是紀錄。
+      ✅ 電子書註記像寫詩，Highlight每一句與自己共鳴的文字
+      ✅ 自建書櫃分類心情、階段或事件，打造成長紀錄
+      🖋 書不是用來讀，是用來寫「當下的你」`
+    },
+    NFJM: {
+      title: "📖 學習療癒師",
+      role: "📚 你是：電子療癒系・情境學習者・結構輕鬆型・影像支配者",
+      desc: "🔍 邊學邊感受、影片搭配心靈雞湯，成長一定要配點氣氛與療癒。",
+      tags: "🧠 特色標籤：#氛圍型知識吸收 #片段共鳴學習 #影片控",
+      quote: "🗯️ 「先聽一段影片再決定要不要讀這章。」",
+      prescription: `
+      💊 線上閱讀處方簽：學習的溫度，不能少。
+      ✅ 有聲書＋影像補強＋電子筆記，讓成長也能被療癒
+      ✅ 氛圍吸收型學習者適合用平台篩選當日SR值書籍
+      🕯 香氛、聲音與短文，是你最溫柔的心靈放鬆配方。`
+    },
+    NFPW: {
+      title: "📖 情緒書信人",
+      role: "📚 你是：電子讀者・主題共鳴者・自由式閱讀者・文字思考派",
+      desc: "🔍 書像人生筆友，哪一章引共鳴哪一章才讀，沒有情緒就不點開。",
+      tags: "🧠 特色標籤：#章節共鳴讀 #書信式理解 #書是我的靈魂寫照",
+      quote: "🗯️ 「書不是讀，是我在對話。」",
+      prescription: `
+      💊 線上閱讀處方簽：你與書的關係是「寫信般」的對話。
+      ✅ 自由式閱讀＋共鳴章節定位＝電子書最佳應用情境
+      ✅ 加入收藏、註記喜歡句子，建立你的心靈書信箱
+      💌 書是一封信，你的閱讀是你與自己之間未曾說出口的呢喃。`
+    },
+    NFPM: {
+      title: "📖 自由流線型",
+      role: "📚 你是：電子靈魂流派・靈感流動型・自由挑選型・影像感官者",
+      desc: "🔍 學習不是任務，是靈光乍現時的藝術行動，靈魂到哪知識跟著去哪。",
+      tags: "🧠 特色標籤：#靈光學習 #反骨型知識追蹤者 #書影音隨行",
+      quote: "🗯️ 「今天想學什麼？問一下我的心情。」",
+      prescription: `
+      💊 線上閱讀處方簽：閱讀跟著靈感走，不該有框架。
+      ✅ 電子書平台支援主題搜尋、自由筆記、跨裝置切換
+      ✅ 書與影音隨行，感覺來了就開書，感覺沒了就聽聲音
+      🌊 知識無形流動，你只是在它發生的頻率上共振。`
+    },
+  };
+  
+  const resultData = resultProfiles[resultCode];
+  const resultContainer = document.getElementById('results');
+  resultContainer.classList.add('fade-in-up');
+  resultContainer.innerHTML = '';
+  
+  const codeHeading = document.createElement('h2');
+  codeHeading.textContent = `你的閱讀人格是`;
+
+  const image = document.createElement('img');
+  image.src = `${resultCode}.png`;
+  image.alt = `${resultCode} 圖像`;
+  image.style.maxWidth = '300px';
+  image.style.display = 'block';
+  image.style.margin = '20px auto';
+
+  const title = document.createElement('h3');
+  title.textContent = resultData.title;
+
+  const role = document.createElement('p');
+  role.textContent = resultData.role;
+
+  const desc = document.createElement('p');
+  desc.textContent = resultData.desc;
+
+  const tags = document.createElement('p');
+  tags.textContent = resultData.tags;
+
+  const quote = document.createElement('blockquote');
+  quote.textContent = resultData.quote;
+  
+  const prescription = document.createElement('div');
+  prescription.innerText = resultData.prescription.trim();
+  prescription.style.whiteSpace = 'pre-line'; // 支援換行
+  prescription.style.background = '#f0f8ff';
+  prescription.style.padding = '12px';
+  prescription.style.borderRadius = '8px';
+  prescription.style.marginTop = '16px';
+  prescription.style.borderLeft = '4px solid #4CAF50';
+  prescription.style.fontSize = '18px';
+  prescription.style.lineHeight = '1.8';
+
+  const restartButton = document.createElement('button');
+  restartButton.textContent = '重新開始測驗';
+  restartButton.onclick = () => location.reload();
+
+  const fbShare = document.createElement('a');
+  fbShare.href = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.href)}`;
+  fbShare.target = '_blank';
+  fbShare.textContent = '分享到 Facebook';
+
+  const br = document.createElement('br'); 
+
+  const link = document.createElement('a');
+  link.href = 'https://ebook.nlpi.edu.tw/';
+  link.target = '_blank';
+  link.rel = 'noopener noreferrer';
+  link.textContent = '立即前往國資圖電子書服務平台';
+
+  const igNote = document.createElement('p');
+  igNote.textContent = '📸 IG 不支援直接分享，請截圖此結果並分享到限時動態！';
+
+  resultContainer.appendChild(codeHeading);
+  resultContainer.appendChild(image);
+  resultContainer.appendChild(title);
+  resultContainer.appendChild(role);
+  resultContainer.appendChild(desc);
+  resultContainer.appendChild(tags);
+  resultContainer.appendChild(quote);
+  resultContainer.appendChild(prescription);
+  resultContainer.appendChild(fbShare);
+  resultContainer.appendChild(br);  
+  resultContainer.appendChild(link);
+  resultContainer.appendChild(igNote);
+  resultContainer.appendChild(restartButton);
+
+  resultContainer.style.display = 'block';
+  // 顯示結果，隱藏測驗頁
+  document.getElementById('quiz-page').style.display = 'none';
+  resultContainer.style.display = 'block';
+}
+
+</script>
+<script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
+<script>
+// 初始化粒子背景
+particlesJS('particles-js', {
+  particles: {
+    number: { value: 60 },
+    color: { value: "#ffffff" }, 
+    shape: { type: "circle" },
+    opacity: { value: 0.15 },
+    size: { value: 4 },
+    move: { enable: true, speed: 1, direction: "none", random: true }
+  },
+  interactivity: { detect_on: "canvas", events: { onhover: { enable: false } } },
+  retina_detect: true
+});
+
+// 產生隨機 emoji 漂浮
+const emojis = ['📘', '🌟', '🧠', '📖', '✨', '📝']; // 👉 你可以在這裡替換 emoji 或用圖片 URL
+setInterval(() => {
+  const emoji = document.createElement('div');
+  emoji.classList.add('floating-emoji');
+  emoji.textContent = emojis[Math.floor(Math.random() * emojis.length)];//修改圖片用
+  //emoji.innerHTML = `<img src="your-icon.png" style="width:32px;">`;  使用png
+
+  emoji.style.left = Math.random() * 100 + 'vw';
+  emoji.style.top = '100vh';
+  document.body.appendChild(emoji);
+
+  setTimeout(() => emoji.remove(), 12000);
+}, 1500); // 每 1.5 秒一個
+
+</script>
+
+</body>
+</html>
+
