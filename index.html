@@ -129,13 +129,35 @@
     button:active {
       transform: scale(0.95);
     }
+/* === Hero image ===================================== */
+    .hero-img{
+      width:100%;          /* 滿版伸縮 */
+      height:auto;         /* 等比縮放 */
+      max-height:80vh;     /* 不會高過整個螢幕 */
+      object-fit:cover;    /* 超過高度時裁切，上下置中 */
+      border-radius:12px;
+      box-shadow:0 8px 20px rgba(0,0,0,.15);
+      cursor:pointer;      /* 滑過顯示可點擊 */
+      transition:.3s transform;
+    }
+    .hero-img:hover{transform:scale(1.02);}  /* 小放大，吸睛 */
 
+    /* ⬆︎ 想讓桌機更矮一些，可加媒體查詢 */
+    @media (min-width:768px){
+      .hero-img{max-height:450px;}
+    }
   </style>
 </head>
 <body>
 
 <div id="particles-js"></div>
 <div class="container" id="home">
+  
+  <!-- 👉 新增：Hero image  -->
+  <img src="start.png" alt="閱讀人格測驗形象圖"
+       class="hero-img" id="hero-img">
+  
+
   <h1>📘 閱讀人格測驗</h1>
   <p>透過 12 題快速了解你的閱讀風格與學習偏好 🍉📖</p>
   <button id="begin-quiz">開始測驗</button>
@@ -543,6 +565,9 @@
 </script>
 <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
 <script>
+document.getElementById('hero-img').addEventListener('click', () =>
+    document.getElementById('begin-quiz').click()
+  );
 // 初始化粒子背景
 particlesJS('particles-js', {
   particles: {
