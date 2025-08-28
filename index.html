@@ -146,21 +146,28 @@
     @media (min-width:768px){
       .hero-img{max-height:450px;}
     }
+/* 讓 #begin-quiz 在容器裡水平置中 */
+    #begin-quiz {
+      display: block;        /* 讓按鈕獨占一行 */
+      margin: 20px auto 0;   /* 上邊距 20px，其餘左右自動置中 */
+    }
   </style>
 </head>
 <body>
 
 <div id="particles-js"></div>
 <div class="container" id="home">
-  
+
   <!-- 👉 新增：Hero image  -->
   <img src="start.png" alt="閱讀人格測驗形象圖"
        class="hero-img" id="hero-img">
-  
 
   <h1>📘 閱讀人格測驗</h1>
-  <p>透過 12 題快速了解你的閱讀風格與學習偏好 🍉📖</p>
-  <button id="begin-quiz">開始測驗</button>
+  <p>12 題超直覺心理測驗，帶你解鎖專屬的閱讀人格卡片 📚✨</p>
+  <p>不只是一本書怎麼讀，而是你怎麼感受這個世界。</p>
+  <p>📲 測完還有個人化風格標籤＋推薦線上閱讀資源 🔗</p>
+  <p>🪞 看見你的閱讀樣子，也讓朋友看看你是哪一型 📤</p>
+  <button id="begin-quiz">開始測驗，探究你的閱讀人格！</button>
 </div>
 
 <div class="container" id="quiz-page" style="display:none;">
@@ -565,9 +572,6 @@
 </script>
 <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
 <script>
-document.getElementById('hero-img').addEventListener('click', () =>
-    document.getElementById('begin-quiz').click()
-  );
 // 初始化粒子背景
 particlesJS('particles-js', {
   particles: {
@@ -601,3 +605,4 @@ setInterval(() => {
 
 </body>
 </html>
+
