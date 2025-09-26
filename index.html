@@ -166,6 +166,20 @@
   <p>12 題超直覺心理測驗，帶你解鎖專屬的閱讀人格卡片 📚✨</p>
   <p>不只是一本書怎麼讀，而是你怎麼感受這個世界。</p>
   <p>🪞 看見你的閱讀樣子，也讓朋友看看你是哪一型 📤</p>
+  
+  <!-- 訪問人次統計 -->
+  <div style="margin-top: 20px; text-align: center; font-size: 16px;">
+    本頁已被拜訪 <span id="visitor-count">載入中...</span> 次
+  </div>
+
+  <script>
+    fetch('https://api.countapi.xyz/hit/nlpiavedu.github.io/16readers')
+      .then(res => res.json())
+      .then(data => {
+        document.getElementById('visitor-count').innerText = data.value;
+      });
+  </script>
+  
   <button id="begin-quiz">開始測驗，探究你的閱讀人格！</button>
 </div>
 
