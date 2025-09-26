@@ -166,12 +166,6 @@
   <p>12 題超直覺心理測驗，帶你解鎖專屬的閱讀人格卡片 📚✨</p>
   <p>不只是一本書怎麼讀，而是你怎麼感受這個世界。</p>
   <p>🪞 看見你的閱讀樣子，也讓朋友看看你是哪一型 📤</p>
-  
-  <!-- 訪問人次統計 -->
-  <div style="margin-top: 20px; text-align: center; font-size: 16px;">
-    本頁已被拜訪 <span id="visitor-count">載入中...</span> 次
-  </div>
-  
   <button id="begin-quiz">開始測驗，探究你的閱讀人格！</button>
 </div>
 
@@ -606,24 +600,6 @@ setInterval(() => {
   setTimeout(() => emoji.remove(), 12000);
 }, 1500); // 每 1.5 秒一個
 
-</script>
-
-<script>
-/* 立即跑就行，因為此時 DOM 已完成 */
-const counterSpan = document.getElementById('visitor-count');
-
-fetch('https://api.countapi.xyz/hit/nlpiavedu.github.io/16readers')
-  .then(r => r.ok ? r.json() : Promise.reject(r.statusText))
-  .then(d => { counterSpan.textContent = d.value.toLocaleString(); })
-  .catch(err => {
-      console.error('CountAPI error:', err);
-      counterSpan.textContent = '—';
-  });
-
-/* 可選：讓 Hero 圖片也能觸發開始測驗 */
-document.getElementById('hero-img')
-        .addEventListener('click', () =>
-          document.getElementById('begin-quiz').click());
 </script>
 
 </body>
